@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-void start_adv(String manufacturerData,String manufacturerId = "9d22");
+void start_adv(String manufacturerData,String manufacturerId);
 void stop_adv();
 
 #endif

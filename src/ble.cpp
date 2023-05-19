@@ -3,10 +3,8 @@
 #include <BLEAdvertising.h>
 #include <exception>
 
-uint8_t mdata[]={
-  0x22,0x9d,
-  0x2d,0xb2,0xa0,0x49,0xab,0x7a,0x09,0xe0,0x96,0x6d,0xc9,0x03,0xbd,0xff,0x7d,0x8c,0x74,0x4a,0x5f,0x85,0xf6,0x9c,0xa9,0x19
-};
+#define MAX_MDATA_SIZE 26
+uint8_t mdata[MAX_MDATA_SIZE];
 
 esp_ble_adv_data_t adata=
 {
@@ -19,7 +17,6 @@ esp_ble_adv_data_t adata=
     .min_interval = 0x00,
     .max_interval = 0x00,
     
-
     .appearance = 0x00,
     .manufacturer_len = sizeof(mdata),
     .p_manufacturer_data = mdata,
@@ -107,8 +104,8 @@ void hexStringToBytes(byte *byteArray, const char *hexString)
 }
 
 void start_adv(String mData,String mId){
-  if(mData.length()>24*2){
-    throw std::runtime_error("Data size must be less or equal to 24 bytes");
+  if(mData.length()>(MAX_MDATA_SIZE-2)*2){
+    throw std::runtime_error("Data packet is too large");
   }
   if(mId.length()!=2*2){
     throw std::runtime_error("Manufacturer id size must be 2 bytes");
@@ -122,7 +119,6 @@ void start_adv(String mData,String mId){
   const size_t dataSize=mData.length()/2;
   hexStringToBytes(mdata+2,mData.c_str());
   adata.manufacturer_len=2+dataSize;
-
 
   ::esp_ble_gap_config_local_privacy(true);
   ::esp_ble_gap_set_rand_addr(rndaddr);
