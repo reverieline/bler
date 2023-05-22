@@ -1,22 +1,98 @@
 #include <Arduino.h>
 #include <BLEDevice.h>
+#include <WiFi.h>
+#include <WiFiManager.h>
+#include <ESPAsyncWebServer.h>
 #include <map>
 #include "ble.h"
 
 const String manidZhiJia = "9d22";
-const std::map<String, String> commandsZhiJia = {
+const std::map<const String,const String> commandsZhiJia = {
     {"on", "fbb0d09f79acdf0fdbbb1dd50c3809c3a24a5f85f69ca919"},
     {"off", "054c2e61855221f12746e32bf2c4f63e5c4a5f85f69ca919"},
 };
 
+#define COMMAND_STOP_DELAY 500
+
+WiFiManager wm;
+#define BTN_PIN 0
+
+AsyncWebServer webServer(80);
+const String webCommandPrefix = "/cmd/";
+
+void startWebServer(){
+  webServer.onNotFound([](AsyncWebServerRequest *req){
+    req->send(404, "text/plain", "Not found");
+  });
+
+  for(auto i=commandsZhiJia.begin();i!=commandsZhiJia.end();i++){
+    webServer.on(String(webCommandPrefix+i->first).c_str(),[](AsyncWebServerRequest *req){
+      const String path=req->url();
+      const String cmd=path.substring(webCommandPrefix.length());
+      
+      Serial.println("web request path: "+path);
+      auto i=commandsZhiJia.find(cmd);
+      if(i==commandsZhiJia.end()){
+        Serial.println("command \""+cmd+"\" not found");
+        req->send(404, "text/plain", "Not found");
+      }else{
+        Serial.println("start adv: manId:" + manidZhiJia + " data:" + i->second);
+        try
+        {
+          startAdv(i->second, manidZhiJia);
+        }
+        catch (std::exception &e)
+        {
+          Serial.println(e.what());
+        }
+        
+        delay(COMMAND_STOP_DELAY);
+        stopAdv();
+        Serial.println("stop adv");
+        req->send(200, "text/plain", "Ok");
+      }
+    });
+  }
+
+  webServer.begin();
+}
+
 void setup()
 {
   Serial.begin(9600);
-  BLEDevice::init("BLER");
+  
+  BLEDevice::init(_HOSTNAME);
+  WiFi.mode(WIFI_STA);
+
+  pinMode(BTN_PIN,INPUT);
+
+  wm.setConfigPortalTimeout(60);
+  wm.setConfigPortalBlocking(false);
+  wm.setAPClientCheck(true);
+  wm.setHostname(_HOSTNAME);
+  wm.autoConnect(_AP_NAME,_AP_PASS);
+
+  startWebServer();
 }
 
 void loop()
 {
+  wm.process();
+  
+  //clear wifi settings on button press
+  if(digitalRead(BTN_PIN)==LOW){
+    delay(100);
+    if(digitalRead(BTN_PIN)==LOW){
+      wm.resetSettings();
+      ESP.restart();
+    }
+  }
+
+  //process comamnds on serial port
+  //processSerial();
+}
+
+void processSerial(void){
   static String cmd;
   while (Serial.available())
   {
@@ -35,20 +111,19 @@ void loop()
     auto i = commandsZhiJia.find(line);
     if (i != commandsZhiJia.end())
     {
-      Serial.printf("start adv: ");
-      Serial.println(" manId:" + manidZhiJia + " data:" + i->second);
+      Serial.println("start adv: manId:" + manidZhiJia + " data:" + i->second);
 
       try
       {
-        start_adv(i->second, manidZhiJia);
+        startAdv(i->second, manidZhiJia);
       }
       catch (std::exception &e)
       {
         Serial.println(e.what());
       }
       
-      delay(1000);
-      stop_adv();
+      delay(COMMAND_STOP_DELAY);
+      stopAdv();
       Serial.println("stop adv");
       continue;
     }
@@ -64,4 +139,4 @@ void loop()
 
     Serial.println("unknown command");
   }
-}
+};

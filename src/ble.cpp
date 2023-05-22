@@ -103,7 +103,7 @@ void hexStringToBytes(byte *byteArray, const char *hexString)
   }
 }
 
-void start_adv(String mData,String mId){
+void startAdv(String mData,String mId){
   if(mData.length()>(MAX_MDATA_SIZE-2)*2){
     throw std::runtime_error("Data packet is too large");
   }
@@ -126,7 +126,7 @@ void start_adv(String mData,String mId){
   ::esp_ble_gap_start_advertising(&aparam);
 }
 
-void stop_adv(){
+void stopAdv(){
   ::esp_ble_gap_stop_advertising();
 }
 
