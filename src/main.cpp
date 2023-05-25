@@ -8,6 +8,7 @@
 
 const String manidZhiJia = "9d22";
 const std::map<const String,const String> commandsZhiJia = {
+    {"bind","33481857816417c72374d51dc4c0f60c6a4a5f85f69ca919"},
     {"on", "fbb0d09f79acdf0fdbbb1dd50c3809c3a24a5f85f69ca919"},
     {"off", "054c2e61855221f12746e32bf2c4f63e5c4a5f85f69ca919"},
 };
@@ -47,6 +48,7 @@ void startWebServer(){
         }
         
         delay(COMMAND_STOP_DELAY);
+        delay(COMMAND_STOP_DELAY);
         stopAdv();
         Serial.println("stop adv");
         req->send(200, "text/plain", "Ok");
@@ -73,23 +75,6 @@ void setup()
   wm.autoConnect(_AP_NAME,_AP_PASS);
 
   startWebServer();
-}
-
-void loop()
-{
-  wm.process();
-  
-  //clear wifi settings on button press
-  if(digitalRead(BTN_PIN)==LOW){
-    delay(100);
-    if(digitalRead(BTN_PIN)==LOW){
-      wm.resetSettings();
-      ESP.restart();
-    }
-  }
-
-  //process comamnds on serial port
-  //processSerial();
 }
 
 void processSerial(void){
@@ -140,3 +125,22 @@ void processSerial(void){
     Serial.println("unknown command");
   }
 };
+
+
+void loop()
+{
+  wm.process();
+  
+  //clear wifi settings on button press
+  if(digitalRead(BTN_PIN)==LOW){
+    delay(100);
+    if(digitalRead(BTN_PIN)==LOW){
+      wm.resetSettings();
+      ESP.restart();
+    }
+  }
+
+  //process comamnds on serial port
+  processSerial();
+}
+

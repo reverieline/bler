@@ -6,6 +6,7 @@ ESP32 BLE remote control for ZhiJia (ZhiGuang) LED controllers.
 4. Send GET requests to HTTP command endpoint: http://\<device ip\>/cmd/\<command name\>
     
     For example, direct your browser to:
+    - http://bler.lan/cmd/bind
     - http://bler.lan/cmd/on
     - http://bler.lan/cmd/off
        
