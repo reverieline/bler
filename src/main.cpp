@@ -8,9 +8,9 @@
 
 const String manidZhiJia = "9d22";
 const std::map<const String,const String> commandsZhiJia = {
-    {"bind","33481857816417c72374d51dc4c0f60c6a4a5f85f69ca919"},
-    {"on", "fbb0d09f79acdf0fdbbb1dd50c3809c3a24a5f85f69ca919"},
-    {"off", "054c2e61855221f12746e32bf2c4f63e5c4a5f85f69ca919"},
+    {"bind","03482867815427f72344e52df4c0f63c5a4a5f85f69ca919"},
+    {"on"/*a+b*/, "0db8dc6971a0d30329ba11d90030f6c2ae4a5f85f69ca919"},
+    {"off","014c2a65855625f52742e72ff6c4f63a584a5f85f69ca919"},
 };
 
 #define COMMAND_STOP_DELAY 500
